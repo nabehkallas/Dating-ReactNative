@@ -4,7 +4,7 @@ import { Text, View } from '@/components/Themed';
 import { mockUsers } from '@/constants/Users';
 
 export default function ProfileScreen() {
-  const currentUser = mockUsers[0]; // Assuming the first user is the current user
+  const currentUser = mockUsers.find(u => u.uid === 'uid1'); // Assuming the current user is 'uid1'
 
   if (!currentUser) {
     return (
@@ -14,14 +14,28 @@ export default function ProfileScreen() {
     );
   }
 
+  const displayLocation = typeof currentUser.location === 'string'
+    ? currentUser.location
+    : `Lat: ${currentUser.location.latitude}, Lon: ${currentUser.location.longitude}`;
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.profileCard}>
-        <Image source={{ uri: currentUser.imageUrl }} style={styles.profileImage} />
+        <Image source={{ uri: currentUser.profileImage }} style={styles.profileImage} />
         <View style={styles.infoContainer}>
           <Text style={styles.name}>{currentUser.name}, {currentUser.age}</Text>
-          <Text style={styles.location}>{currentUser.location}</Text>
+          <Text style={styles.location}>{displayLocation}</Text>
           <Text style={styles.bio}>{currentUser.bio}</Text>
+          {currentUser.gallery && currentUser.gallery.length > 0 && (
+            <View style={styles.galleryContainer}>
+              <Text style={styles.galleryTitle}>Gallery</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {currentUser.gallery.map((img, index) => (
+                  <Image key={index} source={{ uri: img }} style={styles.galleryImage} />
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -78,6 +92,24 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 24,
     textAlign: 'center',
+    marginBottom: 15,
+  },
+  galleryContainer: {
+    marginTop: 10,
+    width: '100%',
+  },
+  galleryTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
+  },
+  galleryImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 10,
   },
   container: {
     flex: 1,

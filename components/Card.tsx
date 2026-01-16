@@ -7,13 +7,15 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ user }) => {
+  const displayLocation = typeof user.location === 'string' ? user.location : 'Lat: ' + user.location.latitude + ', Lon: ' + user.location.longitude;
+
   return (
     <View style={styles.card}>
-      <Image source={{ uri: user.imageUrl }} style={styles.image} />
+      <Image source={{ uri: user.profileImage }} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{user.name}, {user.age}</Text>
         <Text style={styles.bio}>{user.bio}</Text>
-        <Text style={styles.location}>{user.location}</Text>
+        <Text style={styles.location}>{displayLocation}</Text>
       </View>
     </View>
   );

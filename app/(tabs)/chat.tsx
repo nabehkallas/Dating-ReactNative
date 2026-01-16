@@ -16,8 +16,8 @@ export default function ChatScreen() {
   }
 
   const renderMessage = ({ item }: { item: Message }) => {
-    // Assuming current user is '1' for styling purposes
-    const isMyMessage = item.senderId === '1';
+    // Assuming current user is 'uid1' for styling purposes
+    const isMyMessage = item.senderId === 'uid1';
     const messageTime = format(new Date(item.timestamp), 'p'); // 'p' for short time (e.g., 4:30 PM)
 
     return (
@@ -30,7 +30,7 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Chat with {currentMatch.userMap[currentMatch.users.find(id => id !== '1') || '']?.name}</Text>
+      <Text style={styles.title}>Chat with {currentMatch.userMap[currentMatch.users.find(id => id !== 'uid1') || '']?.name}</Text>
       <FlatList
         data={currentMatch.messages}
         renderItem={renderMessage}

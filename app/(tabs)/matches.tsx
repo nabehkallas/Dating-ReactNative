@@ -5,8 +5,8 @@ import { formatDistanceToNowStrict } from 'date-fns'; // For formatting time
 
 export default function MatchesScreen() {
   const renderMatchItem = ({ item }: { item: Match }) => {
-    // Assuming the current user is '1' for demonstration purposes
-    const otherUserId = item.users.find(id => id !== '1');
+    // Assuming the current user is 'uid1' for demonstration purposes
+    const otherUserId = item.users.find(id => id !== 'uid1');
     const otherUser = otherUserId ? item.userMap[otherUserId] : null;
 
     if (!otherUser) {

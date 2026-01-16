@@ -1,0 +1,4 @@
+feat: Enhance Matches and Profile screens
+
+- Enhanced 'app/(tabs)/matches.tsx' to display a FlatList of user cards with images, names, ages, and bios, including a "No Matches" state.
+- Enhanced 'app/(tabs)/profile.tsx' to display a detailed profile card for the current user with an image, name, age, location, and bio.

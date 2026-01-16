@@ -1,25 +1,38 @@
 import { StyleSheet, FlatList, Image } from 'react-native';
-
 import { Text, View } from '@/components/Themed';
-import { mockUsers, User } from '@/constants/Users';
+import { mockMatches, Match } from '@/constants/Matches'; // Import mockMatches and Match interface
+import { formatDistanceToNowStrict } from 'date-fns'; // For formatting time
 
 export default function MatchesScreen() {
-  const renderMatchItem = ({ item }: { item: User }) => (
-    <View style={styles.matchCard}>
-      <Image source={{ uri: item.imageUrl }} style={styles.matchImage} />
-      <View style={styles.matchInfo}>
-        <Text style={styles.matchName}>{item.name}, {item.age}</Text>
-        <Text style={styles.matchBio}>{item.bio}</Text>
+  const renderMatchItem = ({ item }: { item: Match }) => {
+    // Assuming the current user is '1' for demonstration purposes
+    const otherUserId = item.users.find(id => id !== '1');
+    const otherUser = otherUserId ? item.userMap[otherUserId] : null;
+
+    if (!otherUser) {
+      return null; // Should not happen with valid data
+    }
+
+    const timeAgo = formatDistanceToNowStrict(new Date(item.lastMessageTime), { addSuffix: true });
+
+    return (
+      <View style={styles.matchCard}>
+        <Image source={{ uri: otherUser.avatar }} style={styles.matchImage} />
+        <View style={styles.matchInfo}>
+          <Text style={styles.matchName}>{otherUser.name}</Text>
+          <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+          <Text style={styles.lastMessageTime}>{timeAgo}</Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Matches</Text>
-      {mockUsers.length > 0 ? (
+      {mockMatches.length > 0 ? (
         <FlatList
-          data={mockUsers}
+          data={mockMatches}
           renderItem={renderMatchItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
@@ -61,26 +74,33 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     overflow: 'hidden',
+    padding: 10,
   },
   matchImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 15,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 15,
   },
   matchInfo: {
-    padding: 15,
-    justifyContent: 'center',
     flex: 1,
+    justifyContent: 'center',
   },
   matchName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
   },
-  matchBio: {
+  lastMessage: {
     fontSize: 14,
     color: '#666',
+    marginTop: 5,
+  },
+  lastMessageTime: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+    alignSelf: 'flex-end',
   },
   noMatchesContainer: {
     flex: 1,

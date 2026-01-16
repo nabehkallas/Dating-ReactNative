@@ -1,25 +1,19 @@
 export interface User {
-  id: string; // Maps to document ID
-  uid: string; // Maps to "UID" field
+  id: string;
+  uid: string;
   name: string;
   age: number;
   bio: string;
-  profileImage: string; // Main avatar
-  
-  // ✅ ADDED: The Gallery you wanted
-  gallery: string[]; 
-  
-  // ✅ FIXED: Location is not just a string in your DB
+  profileImage: string;
+  gallery: string[];
   location: {
     latitude: number;
     longitude: number;
-  } | string; // Allow string if you reverse-geocode it later
+  } | string;
   
   gender: 'male' | 'female' | 'other';
   isVerified: boolean;
-  
-  // Optional: Good for "Online" status later
-  fcmTokens?: string[]; 
+  fcmTokens?: string[];
 }
 
 export const mockUsers: User[] = [
@@ -44,7 +38,7 @@ export const mockUsers: User[] = [
     bio: 'Software Engineer & Gamer',
     profileImage: 'https://via.placeholder.com/400/33FF57/FFFFFF?text=John',
     gallery: ['https://via.placeholder.com/400/33FF57/FFFFFF?text=John1', 'https://via.placeholder.com/400/33FF57/FFFFFF?text=John2'],
-    location: 'San Francisco', // Example of string location
+    location: 'San Francisco',
     gender: 'male',
     isVerified: false,
     fcmTokens: ['token2'],

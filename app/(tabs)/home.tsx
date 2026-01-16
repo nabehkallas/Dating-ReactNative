@@ -5,7 +5,7 @@ import { mockUsers } from '@/constants/Users';
 import Card from '@/components/Card';
 
 export default function HomeScreen() {
-  const currentUser = mockUsers[0]; // Display the first user as a simple Card
+  const currentUser = mockUsers[0];
 
   return (
     <View style={styles.container}>

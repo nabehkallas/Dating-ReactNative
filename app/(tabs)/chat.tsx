@@ -1,6 +1,8 @@
-import { StyleSheet, FlatList } from 'react-native';
+import { StyleSheet, FlatList, Image, ScrollView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { mockMatches, Message } from '@/constants/Matches';
+import { mockStories, Story } from '@/constants/Stories'; // Import mockStories and Story interface
+import { mockUsers } from '@/constants/Users'; // Import mockUsers to get user info for stories
 import { format } from 'date-fns'; // For formatting timestamp
 
 export default function ChatScreen() {
@@ -9,7 +11,7 @@ export default function ChatScreen() {
 
   if (!currentMatch) {
     return (
-      <View style={styles.container}>
+      <View style={styles.fullContainer}>
         <Text style={styles.title}>No Chat Selected</Text>
       </View>
     );
@@ -28,24 +30,77 @@ export default function ChatScreen() {
     );
   };
 
+  const renderStoryItem = ({ item }: { item: Story }) => {
+    const storyUser = mockUsers.find(user => user.uid === item.userId);
+    return (
+      <View style={styles.storyItem}>
+        <Image source={{ uri: item.imageUrl }} style={styles.storyImage} />
+        <Text style={styles.storyUserName}>{storyUser?.name || 'Unknown'}</Text>
+      </View>
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chat with {currentMatch.userMap[currentMatch.users.find(id => id !== 'uid1') || '']?.name}</Text>
-      <FlatList
-        data={currentMatch.messages}
-        renderItem={renderMessage}
-        keyExtractor={(item, index) => index.toString()} // Using index as key for simplicity, ideally use a unique message ID
-        contentContainerStyle={styles.messagesList}
-        inverted // To show latest messages at the bottom
-      />
+    <View style={styles.fullContainer}>
+      {/* Stories Section */}
+      <View style={styles.storiesContainer}>
+        <FlatList
+          data={mockStories}
+          renderItem={renderStoryItem}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.storiesList}
+        />
+      </View>
+
+      {/* Chat Section */}
+      <View style={styles.chatContainer}>
+        <Text style={styles.title}>Chat with {currentMatch.userMap[currentMatch.users.find(id => id !== 'uid1') || '']?.name}</Text>
+        <FlatList
+          data={currentMatch.messages}
+          renderItem={renderMessage}
+          keyExtractor={(item, index) => index.toString()} // Using index as key for simplicity, ideally use a unique message ID
+          contentContainerStyle={styles.messagesList}
+          inverted // To show latest messages at the bottom
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  fullContainer: {
     flex: 1,
     backgroundColor: '#f0f0f0',
+  },
+  storiesContainer: {
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  storiesList: {
+    paddingHorizontal: 10,
+  },
+  storyItem: {
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  storyImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#FF4B6E',
+  },
+  storyUserName: {
+    fontSize: 12,
+    marginTop: 5,
+    color: '#555',
+  },
+  chatContainer: {
+    flex: 1,
   },
   title: {
     fontSize: 24,

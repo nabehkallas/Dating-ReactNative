@@ -4,7 +4,7 @@ import { Text, View } from '@/components/Themed';
 import { mockUsers } from '@/constants/Users';
 
 export default function ProfileScreen() {
-  const currentUser = mockUsers.find(u => u.uid === 'uid1'); // Assuming the current user is 'uid1'
+  const currentUser = mockUsers.find(u => u.uid === 'uid1'); 
 
   if (!currentUser) {
     return (

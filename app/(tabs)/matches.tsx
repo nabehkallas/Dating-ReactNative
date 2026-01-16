@@ -1,16 +1,15 @@
 import { StyleSheet, FlatList, Image } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { mockMatches, Match } from '@/constants/Matches'; // Import mockMatches and Match interface
-import { formatDistanceToNowStrict } from 'date-fns'; // For formatting time
+import { mockMatches, Match } from '@/constants/Matches';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 export default function MatchesScreen() {
   const renderMatchItem = ({ item }: { item: Match }) => {
-    // Assuming the current user is 'uid1' for demonstration purposes
     const otherUserId = item.users.find(id => id !== 'uid1');
     const otherUser = otherUserId ? item.userMap[otherUserId] : null;
 
     if (!otherUser) {
-      return null; // Should not happen with valid data
+      return null;
     }
 
     const timeAgo = formatDistanceToNowStrict(new Date(item.lastMessageTime), { addSuffix: true });

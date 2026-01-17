@@ -1,13 +1,19 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { User } from '@/constants/Users';
+import { FeedUser } from '@/constants/Users';
 
 interface CardProps {
-  user: User;
+  user: FeedUser;
 }
 
 const Card: React.FC<CardProps> = ({ user }) => {
-  const displayLocation = typeof user.location === 'string' ? user.location : 'Lat: ' + user.location.latitude + ', Lon: ' + user.location.longitude;
+  const displayLocation = typeof user.location === 'string' 
+    ? user.location 
+    : (user.location && 'latitude' in user.location) 
+      ? `Lat: ${user.location.latitude.toFixed(2)}, Lon: ${user.location.longitude.toFixed(2)}`
+      : 'Unknown Location';
+
+  const distance = user.distance_km ? `${user.distance_km.toFixed(1)} km away` : '';
 
   return (
     <View style={styles.card}>
@@ -15,7 +21,10 @@ const Card: React.FC<CardProps> = ({ user }) => {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{user.name}, {user.age}</Text>
         <Text style={styles.bio}>{user.bio}</Text>
-        <Text style={styles.location}>{displayLocation}</Text>
+        <View style={styles.footer}>
+          <Text style={styles.location}>{displayLocation}</Text>
+          {user.distance_km !== undefined && <Text style={styles.distance}>{distance}</Text>}
+        </View>
       </View>
     </View>
   );
@@ -32,30 +41,41 @@ const styles = StyleSheet.create({
     elevation: 5,
     margin: 20,
     width: '90%',
-    aspectRatio: 0.75, // Adjust as needed for card proportions
+    aspectRatio: 0.7, 
   },
   image: {
     width: '100%',
-    height: '70%', // Adjust as needed
+    height: '75%', 
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
   infoContainer: {
     padding: 15,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5,
   },
   bio: {
     fontSize: 16,
     color: '#555',
-    marginBottom: 5,
+    flexShrink: 1, 
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   location: {
     fontSize: 14,
     color: '#888',
+  },
+  distance: {
+    fontSize: 14,
+    color: '#888',
+    fontWeight: 'bold',
   },
 });
 

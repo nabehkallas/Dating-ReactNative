@@ -14,16 +14,16 @@ export interface User {
   bio: string;
   profileImage: string;
   gallery: string[];
-  location: {
-    latitude: number;
-    longitude: number;
-  } | string;
+  location: { latitude: number; longitude: number } | number[] | string;
   
   gender: 'male' | 'female' | 'other';
-  isVerified: boolean;
+  isVerified?: boolean;
   fcmTokens?: string[];
   BlockedUserIds?: string[];
-  preferences?: Preferences; // User's preferences for matching
+  preferences?: Preferences | (string | number)[]; // User's preferences for matching
+}
+export interface FeedUser extends User {
+  distance_km?: number; 
 }
 
 export const mockUsers: User[] = [
@@ -33,8 +33,8 @@ export const mockUsers: User[] = [
     name: 'Sarah',
     age: 24,
     bio: 'Hiker & Coffee lover',
-    profileImage: 'https://via.placeholder.com/400/FF5733/FFFFFF?text=Sarah',
-    gallery: ['https://via.placeholder.com/400/FF5733/FFFFFF?text=Sarah1', 'https://via.placeholder.com/400/FF5733/FFFFFF?text=Sarah2'],
+    profileImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80',
+    gallery: ['https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=500&q=80'],
     location: { latitude: 40.7128, longitude: -74.0060 },
     gender: 'female',
     isVerified: true,
@@ -52,8 +52,8 @@ export const mockUsers: User[] = [
     name: 'John',
     age: 28,
     bio: 'Software Engineer & Gamer',
-    profileImage: 'https://via.placeholder.com/400/33FF57/FFFFFF?text=John',
-    gallery: ['https://via.placeholder.com/400/33FF57/FFFFFF?text=John1', 'https://via.placeholder.com/400/33FF57/FFFFFF?text=John2'],
+    profileImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80',
+    gallery: ['https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80'],
     location: 'San Francisco',
     gender: 'male',
     isVerified: false,

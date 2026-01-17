@@ -1,1 +1,5 @@
-chore: Remove temporary commit_message.txt file
+feat: Add Preferences interface and data to Users constant
+
+- Introduced a new 'Preferences' interface in 'constants/Users.ts' with distance, maxAge, minAge, and gender properties.
+- Added 'preferences?: Preferences' property to the 'User' interface.
+- Updated 'mockUsers' data to include sample 'Preferences' data for each user.

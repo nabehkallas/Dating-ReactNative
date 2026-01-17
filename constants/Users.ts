@@ -1,11 +1,4 @@
 
-export interface Swipe {
-  direction: 'left' | 'right' | 'superlike';
-  swipedBy: string; // UID of the user who performed the swipe
-  swipedOn: string; // UID of the user who was swiped on
-  timestamp: number;
-}
-
 export interface Preferences {
   distance: number; // in km
   maxAge: number;
@@ -30,7 +23,6 @@ export interface User {
   isVerified: boolean;
   fcmTokens?: string[];
   BlockedUserIds?: string[];
-  swipes?: Swipe[]; // Array of swipes made by this user
   preferences?: Preferences; // User's preferences for matching
 }
 
@@ -47,10 +39,6 @@ export const mockUsers: User[] = [
     gender: 'female',
     isVerified: true,
     fcmTokens: ['token1'],
-    swipes: [
-      { direction: 'right', swipedBy: 'uid1', swipedOn: 'uid2', timestamp: Date.now() - 100000 },
-      { direction: 'left', swipedBy: 'uid1', swipedOn: 'uid3', timestamp: Date.now() - 200000 },
-    ],
     preferences: {
       distance: 50,
       maxAge: 30,
@@ -70,10 +58,6 @@ export const mockUsers: User[] = [
     gender: 'male',
     isVerified: false,
     fcmTokens: ['token2'],
-    swipes: [
-      { direction: 'right', swipedBy: 'uid2', swipedOn: 'uid1', timestamp: Date.now() - 150000 },
-      { direction: 'superlike', swipedBy: 'uid2', swipedOn: 'uid5', timestamp: Date.now() - 250000 },
-    ],
     preferences: {
       distance: 100,
       maxAge: 35,

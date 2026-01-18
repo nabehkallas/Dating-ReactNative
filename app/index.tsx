@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, StatusBar, StyleSheet, View } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FeedUser } from '@/constants/Users';
 import { fetchFeed } from '@/services/FeedService';
-
+import { submitSwipe } from '@/services/SwipeService';
 
 import { ActionButtons } from '@/components/Home/ActionButtons';
 import { HomeHeader } from '@/components/Home/HomeHeader';
@@ -15,10 +15,8 @@ export default function HomeScreen() {
   const [feed, setFeed] = useState<FeedUser[]>([]);
   const [loading, setLoading] = useState(true);
   
-
   const swiperRef = useRef<Swiper<FeedUser>>(null);
   const currentUserId = '1Ujr92RFy3D3hb3uRT40'; 
-
 
   useEffect(() => {
     const loadFeed = async () => {
@@ -35,10 +33,26 @@ export default function HomeScreen() {
     loadFeed();
   }, []);
 
+  const handleSwipeApi = async (direction: 'left' | 'right' | 'super', index: number) => {
+    const swipedUser = feed[index];
+    if (!swipedUser) return;
 
-  const handleLike = (index: number) => console.log('Liked', feed[index]?.name);
-  const handlePass = (index: number) => console.log('Passed', feed[index]?.name);
-  const handleSuperLike = (index: number) => console.log('Super Liked', feed[index]?.name);
+    try {
+      
+      const data = await submitSwipe(currentUserId, swipedUser.id, direction);
+      
+            if (data.match) {
+        Alert.alert(
+          "🎉 It's a Match!", 
+          `You and ${swipedUser.name} liked each other! Go to chat to say hi.`
+        );
+      }
+
+    } catch (error) {
+      
+      console.log("Swipe failed silently");
+    }
+  };
 
   if (loading) {
     return (
@@ -53,26 +67,21 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" />
       
       <SafeAreaView style={styles.safeArea}>
-        
-
         <HomeHeader />
-
 
         <SwipeFeed 
           ref={swiperRef}
           data={feed}
-          onSwipeLeft={handlePass}
-          onSwipeRight={handleLike}
-          onSwipeTop={handleSuperLike}
+          onSwipeLeft={(index) => handleSwipeApi('left', index)}
+          onSwipeRight={(index) => handleSwipeApi('right', index)}
+          onSwipeTop={(index) => handleSwipeApi('super', index)}
         />
-
 
         <ActionButtons 
           onSwipeLeft={() => swiperRef.current?.swipeLeft()}
           onSwipeRight={() => swiperRef.current?.swipeRight()}
           onSwipeTop={() => swiperRef.current?.swipeTop()}
         />
-
       </SafeAreaView>
     </View>
   );

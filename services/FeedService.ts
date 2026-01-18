@@ -9,10 +9,8 @@ export const fetchFeed = async (currentUserId: string): Promise<FeedUser[]> => {
       params: { user_id: currentUserId }
     });
 
-    // --- ADAPTER: Clean up the data before giving it to the UI ---
     const cleanUsers: FeedUser[] = response.data.data.map((rawUser) => {
       
-      // 1. Fix Location: Convert Array [lat, lon] -> Object
       let cleanLocation = rawUser.location;
       if (Array.isArray(rawUser.location) && rawUser.location.length >= 2) {
         cleanLocation = {
@@ -21,11 +19,9 @@ export const fetchFeed = async (currentUserId: string): Promise<FeedUser[]> => {
         };
       }
 
-      // 2. Return the clean object
       return {
         ...rawUser,
         location: cleanLocation,
-        // Ensure defaults if missing
         isVerified: rawUser.isVerified || false, 
         gallery: rawUser.gallery || [],
       };

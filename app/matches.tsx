@@ -1,114 +1,133 @@
-import { StyleSheet, FlatList, Image } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { mockMatches, Match } from '@/constants/Matches';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { isToday, isYesterday } from 'date-fns';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  SectionList,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+
+import { fetchPendingLikes, PendingLike, respondToLike } from '@/services/MatchService';
+
+import MatchRow from '@/components/Matches/MatchRow';
+import SectionHeader from '@/components/Matches/SectionHeader';
+
+const CARD_SPACING = 15;
 
 export default function MatchesScreen() {
-  const renderMatchItem = ({ item }: { item: Match }) => {
-    const otherUserId = item.users.find(id => id !== 'uid1');
-    const otherUser = otherUserId ? item.userMap[otherUserId] : null;
+  const [sections, setSections] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    if (!otherUser) {
-      return null;
+
+  const currentUserId = 'CG8f0w4XuScU2FEoO3VfUy6sWZ47'; 
+
+  useEffect(() => {
+    loadLikes();
+  }, []);
+
+  const loadLikes = async () => {
+    try {
+      const data = await fetchPendingLikes(currentUserId);
+      const grouped = groupLikesByDate(data);
+      setSections(grouped);
+    } catch (error) {
+      console.log("Error loading likes", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const timeAgo = formatDistanceToNowStrict(new Date(item.lastMessageTime), { addSuffix: true });
+  const chunkArray = (array: PendingLike[], size: number) => {
+    const chunked = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunked.push(array.slice(i, i + size));
+    }
+    return chunked;
+  };
 
-    return (
-      <View style={styles.matchCard}>
-        <Image source={{ uri: otherUser.avatar }} style={styles.matchImage} />
-        <View style={styles.matchInfo}>
-          <Text style={styles.matchName}>{otherUser.name}</Text>
-          <Text style={styles.lastMessage}>{item.lastMessage}</Text>
-          <Text style={styles.lastMessageTime}>{timeAgo}</Text>
-        </View>
-      </View>
-    );
+  const groupLikesByDate = (likes: PendingLike[]) => {
+    const today: PendingLike[] = [];
+    const yesterday: PendingLike[] = [];
+    const earlier: PendingLike[] = [];
+
+    likes.forEach(like => {
+      const date = new Date(like.timestamp);
+      if (isToday(date)) today.push(like);
+      else if (isYesterday(date)) yesterday.push(like);
+      else earlier.push(like);
+    });
+
+    const result = [];
+    
+    if (today.length > 0) result.push({ title: 'Today', data: chunkArray(today, 2) });
+    if (yesterday.length > 0) result.push({ title: 'Yesterday', data: chunkArray(yesterday, 2) });
+    if (earlier.length > 0) result.push({ title: 'Earlier', data: chunkArray(earlier, 2) });
+
+    return result;
+  };
+
+  const handleResponse = async (user: PendingLike, action: 'accept' | 'reject') => {
+    try {
+      const result = await respondToLike(currentUserId, user.id, action);
+      loadLikes(); 
+
+      if (action === 'accept' && result.match) {
+        Alert.alert("It's a Match! 🎉", `You can now chat with ${user.name}`);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Action failed");
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Matches</Text>
-      {mockMatches.length > 0 ? (
-        <FlatList
-          data={mockMatches}
-          renderItem={renderMatchItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-        />
-      ) : (
-        <View style={styles.noMatchesContainer}>
-          <Text style={styles.noMatchesText}>No matches yet. Keep swiping!</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Matches</Text>
+        <Text style={styles.headerSubtitle}>This is a list of people who have liked you.</Text>
+      </View>
+
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#fe3c72" />
         </View>
+      ) : sections.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.emptyText}>No new likes yet.</Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item, index) => index.toString()}
+          // Use the imported components
+          renderItem={({ item }) => (
+            <MatchRow items={item} onResponse={handleResponse} />
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <SectionHeader title={title} />
+          )}
+          contentContainerStyle={styles.listContent}
+        />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f8f8f8',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 25,
-    color: '#333',
-  },
-  listContainer: {
-    width: '100%',
-  },
-  matchCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    overflow: 'hidden',
-    padding: 10,
-  },
-  matchImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 15,
-  },
-  matchInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  matchName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  lastMessage: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
-  },
-  lastMessageTime: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-    alignSelf: 'flex-end',
-  },
-  noMatchesContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noMatchesText: {
-    fontSize: 18,
-    color: '#888',
-    textAlign: 'center',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  
+  header: { padding: 20, paddingBottom: 10 },
+  headerTitle: { fontSize: 34, fontWeight: 'bold', color: '#000' },
+  headerSubtitle: { fontSize: 14, color: '#666', marginTop: 5, marginBottom: 10 },
+  
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { fontSize: 16, color: '#999' },
+
+  listContent: { paddingHorizontal: CARD_SPACING, paddingBottom: 40 },
 });

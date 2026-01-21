@@ -24,7 +24,7 @@ export default function MatchesScreen() {
   const [loading, setLoading] = useState(true);
 
 
-  const currentUserId = 'CG8f0w4XuScU2FEoO3VfUy6sWZ47'; 
+  const currentUserId = '1Ujr92RFy3D3hb3uRT40'; 
 
   useEffect(() => {
     loadLikes();

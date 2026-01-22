@@ -1,3 +1,4 @@
+// components/Matches/MatchCard.tsx
 import { PendingLike } from '@/services/MatchService';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,10 +10,11 @@ const CARD_WIDTH = (width - (CARD_SPACING * 3)) / 2;
 interface MatchCardProps {
   item: PendingLike;
   onResponse: (user: PendingLike, action: 'accept' | 'reject') => void;
-  isPlaceholder?: boolean; // Used for invisible spacer cards
+  isPlaceholder?: boolean; 
 }
 
 export default function MatchCard({ item, onResponse, isPlaceholder }: MatchCardProps) {
+  
   if (isPlaceholder) {
     return <View style={[styles.card, { backgroundColor: 'transparent', elevation: 0, shadowOpacity: 0 }]} />;
   }
@@ -20,32 +22,40 @@ export default function MatchCard({ item, onResponse, isPlaceholder }: MatchCard
   return (
     <View style={styles.card}>
       
+      {/* 1. IMAGE */}
       <Image 
-        source={{ uri: item.avatar || 'https://via.placeholder.com/150' }} 
+        source={{ uri: item.avatar }} 
         style={[styles.image, item.isPrivate && styles.blurImage]} 
         blurRadius={item.isPrivate ? 20 : 0}
       />
       
-      
+      {/* 2. PRIVATE LOCK OVERLAY */}
       {item.isPrivate && (
         <View style={styles.privateOverlay}>
           <Text style={{fontSize: 24}}>🔒</Text>
         </View>
       )}
 
-      
+      {/* 3. TEXT INFO */}
       <View style={styles.textOverlay}>
-        <Text style={styles.nameText}>{item.name}, {item.age}</Text>
+        <Text style={styles.nameText}>
+          {item.name}, {item.age}
+        </Text>
+        {item.type === 'super' && (
+           <Text style={styles.superText}>★ Super Like</Text>
+        )}
       </View>
 
-      
+      {/* 4. ACTION BAR (Accept/Reject) */}
       <View style={styles.actionBar}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => onResponse(item, 'reject')}>
-          <Text style={styles.actionIcon}>✕</Text>
+          <Text style={[styles.actionIcon, { color: '#ff6b6b' }]}>✕</Text>
         </TouchableOpacity>
+        
         <View style={styles.divider} />
+        
         <TouchableOpacity style={styles.actionBtn} onPress={() => onResponse(item, 'accept')}>
-          <Text style={styles.actionIcon}>♥️</Text>
+          <Text style={[styles.actionIcon, { color: '#4ecdc4' }]}>♥️</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -57,7 +67,7 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: 250,
     borderRadius: 15,
-    backgroundColor: '#000',
+    backgroundColor: '#222', 
     overflow: 'hidden',
     position: 'relative',
     shadowColor: "#000",
@@ -65,6 +75,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 4,
+    marginBottom: 5
   },
   image: { 
     width: '100%', 
@@ -78,7 +89,7 @@ const styles = StyleSheet.create({
   
   textOverlay: { 
     position: 'absolute', 
-    bottom: 60, 
+    bottom: 60, // Sits above the action bar
     left: 10, 
     right: 10, 
     zIndex: 2 
@@ -86,6 +97,10 @@ const styles = StyleSheet.create({
   nameText: {
     color: 'white', fontSize: 18, fontWeight: 'bold',
     textShadowColor: 'rgba(0, 0, 0, 0.75)', textShadowOffset: { width: -1, height: 1 }, textShadowRadius: 10
+  },
+  superText: {
+    color: '#FFD700', fontSize: 12, fontWeight: 'bold', marginTop: 2,
+    textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 2
   },
 
   actionBar: {
@@ -96,11 +111,11 @@ const styles = StyleSheet.create({
     height: 50,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.1)'
   },
   actionBtn: { flex: 1, height: '100%', justifyContent: 'center', alignItems: 'center' },
-  actionIcon: { fontSize: 20, color: '#fff', fontWeight: 'bold' },
-  divider: { width: 1, height: '60%', backgroundColor: 'rgba(255,255,255,0.3)' }
+  actionIcon: { fontSize: 24, fontWeight: 'bold' },
+  divider: { width: 1, height: '60%', backgroundColor: 'rgba(255,255,255,0.2)' }
 });

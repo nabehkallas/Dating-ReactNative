@@ -1,3 +1,4 @@
+// components/Matches/MatchRow.tsx
 import { PendingLike } from '@/services/MatchService';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -14,6 +15,7 @@ export default function MatchRow({ items, onResponse }: MatchRowProps) {
       {items.map(like => (
         <MatchCard key={like.id} item={like} onResponse={onResponse} />
       ))}
+      
       
       {items.length === 1 && (
         <MatchCard 

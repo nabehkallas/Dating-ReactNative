@@ -1,15 +1,15 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-// Import the service
+
 import { Story } from '@/constants/Story';
 import { fetchStoriesFeed } from '@/services/StoryService';
 
@@ -27,7 +27,7 @@ export default function StoriesRail({ currentUserId }: { currentUserId: string }
       const data = await fetchStoriesFeed(currentUserId);
       setStories(data);
     } catch (error) {
-      // Error is already logged in service
+
     } finally {
       setLoading(false);
     }

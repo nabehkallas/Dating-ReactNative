@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
-  const currentUserId = '4BKr6lVknOESsJ97N7x8XGPv9XHR'; 
+  const currentUserId = 'user_1'; 
   
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         
-        {/* 1. Header & Profile Image */}
+
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Image 
@@ -53,7 +53,7 @@ export default function ProfileScreen() {
               style={styles.avatar} 
             />
             
-            {/* Verified Badge */}
+
             {profile.isVerified && (
               <View style={styles.verifiedBadge}>
                 <Ionicons name="checkmark" size={12} color="#fff" />
@@ -126,7 +126,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: '#f8f9fa' },
   scrollContent: { paddingBottom: 20 },
   
   header: { alignItems: 'center', marginTop: 20, marginBottom: 30 },

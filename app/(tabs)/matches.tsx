@@ -1,4 +1,5 @@
 import { isToday, isYesterday } from 'date-fns';
+import * as Haptics from 'expo-haptics'; // Optional: Adds physical feedback
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 import { fetchPendingLikes, PendingLike, respondToLike } from '@/services/MatchService';
 
 import MatchRow from '@/components/Matches/MatchRow';
@@ -23,8 +23,7 @@ export default function MatchesScreen() {
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-
-  const currentUserId = '1Ujr92RFy3D3hb3uRT40'; 
+  const currentUserId = 'user_1'; 
 
   useEffect(() => {
     loadLikes();
@@ -71,16 +70,44 @@ export default function MatchesScreen() {
     return result;
   };
 
+  
   const handleResponse = async (user: PendingLike, action: 'accept' | 'reject') => {
-    try {
-      const result = await respondToLike(currentUserId, user.id, action);
-      loadLikes(); 
+    
+  
+    if (action === 'accept') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
 
-      if (action === 'accept' && result.match) {
-        Alert.alert("It's a Match! 🎉", `You can now chat with ${user.name}`);
-      }
+  
+    setSections(currentSections => {
+      return currentSections.map(section => {
+  
+        const updatedChunks = section.data.map((chunk: PendingLike[]) => 
+          chunk.filter(u => u.id !== user.id)
+        ).filter((chunk: PendingLike[]) => chunk.length > 0); // Remove empty chunks
+
+        return { ...section, data: updatedChunks };
+      }).filter(section => section.data.length > 0); // Remove empty sections
+    });
+
+  
+    if (action === 'accept') {
+       setTimeout(() => {
+          Alert.alert("It's a Match! 🎉", `You can now chat with ${user.name}`);
+       }, 200);
+    }
+
+  try {
+      await respondToLike(currentUserId, user.id, action);
+      
     } catch (error) {
-      Alert.alert("Error", "Action failed");
+      console.error("Failed to sync match", error);
+      Alert.alert("Error", "Action failed. Reloading...");
+      
+      
+      loadLikes(); 
     }
   };
 
@@ -105,7 +132,6 @@ export default function MatchesScreen() {
         <SectionList
           sections={sections}
           keyExtractor={(item, index) => index.toString()}
-          // Use the imported components
           renderItem={({ item }) => (
             <MatchRow items={item} onResponse={handleResponse} />
           )}

@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ChatScreen() {
   const navigation = useNavigation<any>();
-  const currentUserId = '4BKr6lVknOESsJ97N7x8XGPv9XHR'; // Hardcoded ID for now
+  const currentUserId = 'user_1'; // Hardcoded ID for now
 
   const [chats, setChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

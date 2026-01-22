@@ -16,7 +16,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   
   const swiperRef = useRef<Swiper<FeedUser>>(null);
-  const currentUserId = '1Ujr92RFy3D3hb3uRT40'; 
+  const currentUserId = 'user_1'; 
 
   useEffect(() => {
     const loadFeed = async () => {

@@ -1,8 +1,9 @@
-// app/(tabs)/chat.tsx
+
 import StoriesRail from '@/components/stories/StoriesRail';
 import { subscribeToInbox } from '@/services/ChatService';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -15,18 +16,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function ChatScreen() {
-  const navigation = useNavigation<any>();
-  const currentUserId = 'user_1'; // Hardcoded ID for now
+  const { t } = useTranslation();
+  const router = useRouter(); 
+  const { user } = useAuth();
 
   const [chats, setChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. REAL-TIME INBOX LISTENER
+  
   useEffect(() => {
-    const unsubscribe = subscribeToInbox(currentUserId, (data) => {
+    if (!user) return; 
+
+    const unsubscribe = subscribeToInbox(user.uid, (data) => {
       const formattedData = data.map(chat => ({
         ...chat,
+        
         time: timeAgo(chat.timestamp) 
       }));
       
@@ -35,7 +42,7 @@ export default function ChatScreen() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const timeAgo = (date: Date) => {
     if (!date) return '';
@@ -47,42 +54,61 @@ export default function ChatScreen() {
   };
 
   const handlePressChat = (item: any) => {
-    navigation.navigate('chat_room', { 
-      matchId: item.id,
-      userId: currentUserId,
-      userName: 'Me',
-      otherUserName: item.name,
-      otherUserAvatar: item.avatar
+    if (!user) return;
+
+  
+    const validOtherUserImage = 
+                             item.userInfo?.avatar 
+                             || item.avatar 
+                             || 'https://placehold.co/200/png';
+
+    
+    router.push({
+      pathname: "/chat_room",
+      params: { 
+        matchId: item.id, 
+        userId: user.uid,
+        userName: user.displayName || 'Me',
+        otherUserName: item.name,
+        otherUserAvatar: validOtherUserImage,
+        otherUserId: item.otherUserId 
+      }
     });
   };
 
-  const renderChatItem = ({ item }: any) => (
-    <TouchableOpacity style={styles.chatRow} onPress={() => handlePressChat(item)}>
-      <Image 
-        source={{ uri: item.avatar || 'https://placehold.co/150' }} 
-        style={styles.chatAvatar} 
-      />
-      <View style={styles.chatContent}>
-        <View style={styles.chatHeader}>
-          <Text style={styles.chatName}>{item.name}</Text>
-          <Text style={styles.chatTime}>{item.time}</Text>
+  const renderChatItem = ({ item }: any) => {
+    
+    const displayImage = item.avatar ||  'https://placehold.co/150/png';
+
+    return (
+      <TouchableOpacity style={styles.chatRow} onPress={() => handlePressChat(item)}>
+        <Image 
+          source={{ uri: displayImage }} 
+          style={styles.chatAvatar} 
+        />
+        <View style={styles.chatContent}>
+          <View style={styles.chatHeader}>
+            <Text style={styles.chatName}>{item.name}</Text>
+            <Text style={styles.chatTime}>{item.time}</Text>
+          </View>
+          <Text style={styles.chatMessage} numberOfLines={1}>
+            {item.message}
+          </Text>
         </View>
-        <Text style={styles.chatMessage} numberOfLines={1}>
-          {item.message}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <Text style={styles.title}>Messages</Text>
+        <Text style={styles.title}>{t('Messages')}</Text>
       </View>
 
       <View>
-        <StoriesRail currentUserId={currentUserId} />
+       
+        <StoriesRail currentUserId={user?.uid || ''} />
       </View>
 
       {loading ? (
@@ -94,7 +120,12 @@ export default function ChatScreen() {
           renderItem={renderChatItem}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No matches yet.</Text>
+            <View style={{ marginTop: 50, alignItems: 'center' }}>
+              <Text style={styles.emptyText}>No matches yet.</Text>
+              <Text style={{color:'#ccc', fontSize:12, marginTop:5}}>
+                Start swiping to find people!
+              </Text>
+            </View>
           }
         />
       )}
@@ -125,5 +156,5 @@ const styles = StyleSheet.create({
   chatName: { fontSize: 16, fontWeight: '600', color: '#000' },
   chatTime: { fontSize: 12, color: '#999' },
   chatMessage: { fontSize: 14, color: '#666' },
-  emptyText: { textAlign: 'center', marginTop: 50, color: '#999', fontSize: 16 }
+  emptyText: { textAlign: 'center', color: '#999', fontSize: 18, fontWeight: '600' }
 });

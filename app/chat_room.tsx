@@ -1,13 +1,14 @@
-// app/chat_room.tsx
+
 import { sendMessage, subscribeToMessages } from '@/services/ChatService';
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,38 +21,44 @@ import {
   InputToolbar,
   Send
 } from 'react-native-gifted-chat';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-type ParamList = {
-  ChatRoom: {
-    matchId: string;
-    userId: string; 
-    userName: string;
-    otherUserName: string;
-    otherUserAvatar: string;
-  };
-};
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ChatRoomScreen() {
-  const navigation = useNavigation();
-  const route = useRoute<RouteProp<ParamList, 'ChatRoom'>>();
+  const router = useRouter(); 
+  const insets = useSafeAreaInsets();
   
- 
-  const params = route.params || {};
+  
+  const params = useLocalSearchParams();
   const { 
     matchId, 
-    userId = '4BKr6lVknOESsJ97N7x8XGPv9XHR', // Fallback ID
-    userName = 'Me', 
+    userId, 
+    userName, 
     otherUserName = 'Chat', 
-    otherUserAvatar 
-  } = params;
+    otherUserAvatar,
+    otherUserId
+  } = params as { 
+    matchId: string, 
+    userId: string, 
+    userName: string, 
+    otherUserName: string, 
+    otherUserAvatar: string 
+    otherUserId: string 
+  };
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. REAL-TIME LISTENER
+
+  const handleOpenProfile = () => {
+    router.push({
+      pathname: '/public_profile',
+      params: { userId: otherUserId } 
+    });
+  };
+
+  
   useEffect(() => {
-    if (!matchId) return;
+    if (!matchId || !userId) return;
 
     const unsubscribe = subscribeToMessages(matchId, (newMessages) => {
       const formatted = newMessages.map((msg) => ({
@@ -72,7 +79,7 @@ export default function ChatRoomScreen() {
     return () => unsubscribe();
   }, [matchId, userId, userName, otherUserName, otherUserAvatar]);
 
- 
+  
   const onSend = useCallback(async (newMessages: IMessage[] = []) => {
     setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages));
     
@@ -86,7 +93,8 @@ export default function ChatRoomScreen() {
     }
   }, [matchId, userId]);
 
- 
+  
+
   const renderInputToolbar = useCallback((props: any) => (
     <InputToolbar
       {...props}
@@ -107,7 +115,7 @@ export default function ChatRoomScreen() {
     <Bubble {...props} 
       wrapperStyle={{
         right: { backgroundColor: '#fe3c72' },
-        left: { backgroundColor: '#ffffff' }
+        left: { backgroundColor: '#f0f0f0' }
       }} 
       textStyle={{
         right: { color: '#ffffff' },
@@ -116,19 +124,31 @@ export default function ChatRoomScreen() {
     />
   ), []);
 
+  
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={28} color="#fe3c72" />
-        </TouchableOpacity>
-        
-        {otherUserAvatar && (
-          <Image source={{ uri: otherUserAvatar }} style={styles.headerAvatar} />
-        )}
-        
-        <Text style={styles.headerTitle}>{otherUserName}</Text>
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
+
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeHeader}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color="#fe3c72" />
+          </TouchableOpacity>
+          
+
+          <TouchableOpacity 
+            onPress={handleOpenProfile} 
+            style={styles.headerProfileContainer}
+          >
+            {otherUserAvatar && (
+              <Image source={{ uri: otherUserAvatar }} style={styles.headerAvatar} />
+            )}
+            <Text style={styles.headerTitle}>{otherUserName}</Text>
+          </TouchableOpacity>
+
+        </View>
+      </SafeAreaView>
 
       {loading ? (
         <ActivityIndicator size="large" color="#fe3c72" style={{ marginTop: 20 }} />
@@ -136,44 +156,58 @@ export default function ChatRoomScreen() {
         <KeyboardAvoidingView 
           style={{ flex: 1 }} 
           behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} 
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
         >
           <GiftedChat
             messages={messages}
             onSend={messages => onSend(messages)}
             user={{ _id: userId }}
-            showAvatarForEveryMessage={true}
-            alwaysShowSend
+            
+            
+            
             textInputStyle={styles.textInput}
             placeholder="Type a message..."
             textInputProps={{
               placeholderTextColor: '#999',
-              keyboardAppearance: 'light',
-              style: { color: '#000000' }
+              style: { color: '#000', paddingTop: 8, paddingLeft: 10 } 
             }}
+            
+            
             renderInputToolbar={renderInputToolbar}
             renderSend={renderSend}
             renderBubble={renderBubble}
+            
+            
+            bottomOffset={insets.bottom} 
           />
         </KeyboardAvoidingView>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  header: {
+  safeHeader: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    zIndex: 10,
+  },
+  headerContent: {
     flexDirection: 'row', 
     alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
-    height: 60,
+    height: 50,
   },
   backButton: { marginRight: 10, padding: 5 },
+  
+  
+  headerProfileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   headerAvatar: {
     width: 36,
     height: 36,
@@ -182,6 +216,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee'
   },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  
+
   inputToolbar: {
     backgroundColor: '#fff',
     borderTopWidth: 0,
@@ -194,15 +230,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   textInput: {
-    color: '#000',
     backgroundColor: '#f5f5f5',
     borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingTop: 10, 
-    paddingBottom: 10,
     marginTop: 6,
     marginRight: 10,
     marginLeft: 0,
+    paddingHorizontal: 10,
     fontSize: 16,
     lineHeight: 20,
   },

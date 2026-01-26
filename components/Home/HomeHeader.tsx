@@ -1,32 +1,41 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface HomeHeaderProps {
   title?: string;
   subtitle?: string;
-  onLeftPress?: () => void;
-  onRightPress?: () => void;
+  onFilterPress?: () => void;
+  onAddPress?: () => void; 
 }
 
 export const HomeHeader: React.FC<HomeHeaderProps> = ({ 
   title = "Discover", 
-  subtitle = "Chicago, IL",
-  onLeftPress,
-  onRightPress
+  subtitle = "Nearby",
+  onFilterPress,
+  onAddPress 
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={styles.header}>
-      <TouchableOpacity onPress={onLeftPress} style={styles.headerIconSmall}>
-        <Text style={styles.iconText}>‹</Text>
+      
+      <TouchableOpacity 
+        style={styles.headerIconSmall} 
+        onPress={onAddPress}
+      >
+        <Ionicons name="add-sharp" size={30} color="#fe3c72" />
       </TouchableOpacity>
       
+      
       <View>
-        <Text style={styles.headerTitle}>{title}</Text>
-        <Text style={styles.headerSubtitle}>{subtitle}</Text>
+        <Text style={styles.headerTitle}>{t('title')}</Text>
+        <Text style={styles.headerSubtitle}>{t('subtitle')}</Text>
       </View>
       
-      <TouchableOpacity onPress={onRightPress} style={styles.headerIconSmall}>
-        <Text style={styles.iconText}>≡</Text>
+      
+      <TouchableOpacity onPress={onFilterPress} style={styles.headerIconSmall}>
+        <Ionicons name="options" size={24} color="#fe3c72" />
       </TouchableOpacity>
     </View>
   );
@@ -41,12 +50,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     zIndex: 10,
   },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', color: '#000' },
-  headerSubtitle: { fontSize: 12, color: '#888', textAlign: 'center' },
-  headerIconSmall: {
-    width: 40, height: 40, backgroundColor: 'white', borderRadius: 12,
-    justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3,
+  headerTitle: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    color: '#000' 
   },
-  iconText: { fontSize: 20, color: '#fe3c72', fontWeight: 'bold' },
+  headerSubtitle: { 
+    fontSize: 12, 
+    color: '#888', 
+    textAlign: 'center' 
+  },
+  headerIconSmall: {
+    width: 44, 
+    height: 44, 
+    backgroundColor: 'white', 
+    borderRadius: 12,
+    justifyContent: 'center', 
+    alignItems: 'center',
+    // Shadow for depth
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.1, 
+    shadowRadius: 4, 
+    elevation: 3,
+  },
 });

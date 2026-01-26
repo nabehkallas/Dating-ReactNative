@@ -1,6 +1,7 @@
 import { isToday, isYesterday } from 'date-fns';
-import * as Haptics from 'expo-haptics'; // Optional: Adds physical feedback
-import React, { useEffect, useState } from 'react';
+import * as Haptics from 'expo-haptics';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,7 +13,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
+import { useAuth } from '@/context/AuthContext';
 import { fetchPendingLikes, PendingLike, respondToLike } from '@/services/MatchService';
+import { useTranslation } from 'react-i18next';
 
 import MatchRow from '@/components/Matches/MatchRow';
 import SectionHeader from '@/components/Matches/SectionHeader';
@@ -20,24 +24,33 @@ import SectionHeader from '@/components/Matches/SectionHeader';
 const CARD_SPACING = 15;
 
 export default function MatchesScreen() {
+  const { t } = useTranslation();
   const [sections, setSections] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingLikes, setLoadingLikes] = useState(true);
 
-  const currentUserId = 'user_1'; 
+  const { user, loading: authLoading } = useAuth();
 
-  useEffect(() => {
-    loadLikes();
-  }, []);
+ 
+  useFocusEffect(
+    useCallback(() => {
+      if (user) {
+        
+        loadLikes();
+      }
+    }, [user])
+  );
 
   const loadLikes = async () => {
+    if (!user) return;
+
     try {
-      const data = await fetchPendingLikes(currentUserId);
+      const data = await fetchPendingLikes(user.uid);
       const grouped = groupLikesByDate(data);
       setSections(grouped);
     } catch (error) {
       console.log("Error loading likes", error);
     } finally {
-      setLoading(false);
+      setLoadingLikes(false);
     }
   };
 
@@ -70,63 +83,65 @@ export default function MatchesScreen() {
     return result;
   };
 
-  
-  const handleResponse = async (user: PendingLike, action: 'accept' | 'reject') => {
-    
-  
+  const handleResponse = async (targetUser: PendingLike, action: 'accept' | 'reject') => {
+    if (!user) return;
+
     if (action === 'accept') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
-  
     setSections(currentSections => {
       return currentSections.map(section => {
-  
+       
         const updatedChunks = section.data.map((chunk: PendingLike[]) => 
-          chunk.filter(u => u.id !== user.id)
-        ).filter((chunk: PendingLike[]) => chunk.length > 0); // Remove empty chunks
+          chunk.filter(u => u.id !== targetUser.id)
+        ).filter((chunk: PendingLike[]) => chunk.length > 0); 
 
         return { ...section, data: updatedChunks };
-      }).filter(section => section.data.length > 0); // Remove empty sections
+      }).filter(section => section.data.length > 0); 
     });
 
-  
     if (action === 'accept') {
        setTimeout(() => {
-          Alert.alert("It's a Match! 🎉", `You can now chat with ${user.name}`);
+         Alert.alert("It's a Match! 🎉", `You can now chat with ${targetUser.name}`);
        }, 200);
     }
 
-  try {
-      await respondToLike(currentUserId, user.id, action);
+   
+    try {
+      
+      await respondToLike(user.uid, targetUser.id, action);
       
     } catch (error) {
       console.error("Failed to sync match", error);
       Alert.alert("Error", "Action failed. Reloading...");
-      
-      
       loadLikes(); 
     }
   };
+
+  
+  if (authLoading || (loadingLikes && sections.length === 0)) {
+    return (
+      <View style={[styles.center,{backgroundColor: '#fff'}]}>
+        <ActivityIndicator size="large" color="#fe3c72" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Matches</Text>
-        <Text style={styles.headerSubtitle}>This is a list of people who have liked you.</Text>
+        <Text style={styles.headerTitle}>{t('Matches')}</Text>
+        <Text style={styles.headerSubtitle}>{t('This is a list of people who have liked you.')}</Text>
       </View>
 
-      {loading ? (
+      {sections.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#fe3c72" />
-        </View>
-      ) : sections.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyText}>No new likes yet.</Text>
+          <Text style={styles.emptyText}>{t('No new likes yet.')}</Text>
         </View>
       ) : (
         <SectionList

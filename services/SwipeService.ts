@@ -1,5 +1,35 @@
+import axios from 'axios';
+import { ip } from '../constants/constants';
+import { auth } from '../firebaseConfig';
 
-const API_URL = 'http://172.20.10.3:8000/api/swipe';
+
+
+const BASE_URL = ip;
+
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+
+api.interceptors.request.use(async (config) => {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const token = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch (error) {
+      console.error("Error fetching token for swipe:", error);
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 export const submitSwipe = async (
   currentUserId: string, 
@@ -7,24 +37,14 @@ export const submitSwipe = async (
   direction: 'left' | 'right' | 'super'
 ) => {
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        user_id: currentUserId,
-        swiped_user_id: swipedUserId,
-        direction: direction,
-      }),
+
+    const response = await api.post('/swipe', {
+      user_id: currentUserId,
+      swiped_user_id: swipedUserId,
+      direction: direction,
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error('Swipe Service Error:', error);
     throw error;

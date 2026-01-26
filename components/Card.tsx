@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
 import { FeedUser } from '@/constants/Users';
+import React from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 interface CardProps {
   user: FeedUser;
@@ -17,7 +17,7 @@ const Card: React.FC<CardProps> = ({ user }) => {
 
   return (
     <View style={styles.card}>
-      <Image source={{ uri: user.profileImage }} style={styles.image} />
+      <Image source={{ uri: user.avatar }} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{user.name}, {user.age}</Text>
         <Text style={styles.bio}>{user.bio}</Text>

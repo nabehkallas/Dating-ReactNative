@@ -1,7 +1,7 @@
 export interface Swipe {
   direction: 'left' | 'right' | 'superlike';
-  swipedBy: string; // UID of the user who performed the swipe
-  swipedOn: string; // UID of the user who was swiped on
+  swipedBy: string; 
+  swipedOn: string; 
   timestamp: number;
 }
 

@@ -1,4 +1,4 @@
-// src/services/ChatService.ts
+
 import {
   addDoc,
   collection,
@@ -15,7 +15,7 @@ import { db } from '../firebaseConfig';
 
 export const sendMessage = async (userId: string, matchId: string, text: string) => {
   try {
-const messagesRef = collection(db, 'matches', matchId, 'messages');
+    const messagesRef = collection(db, 'matches', matchId, 'messages');
     await addDoc(messagesRef, {
       text: text,
       senderId: userId,
@@ -54,7 +54,6 @@ export const subscribeToMessages = (matchId: string, onUpdate: (msgs: any[]) => 
   }, (error) => console.error("Message Subscribe Error:", error));
 };
 
-
 export const subscribeToInbox = (userId: string, onUpdate: (chats: any[]) => void) => {
   const matchesRef = collection(db, 'matches');
 
@@ -68,10 +67,15 @@ export const subscribeToInbox = (userId: string, onUpdate: (chats: any[]) => voi
     const chats = snapshot.docs.map(doc => {
       const data = doc.data();
       
-
+      
       const isUser1 = data.users?.[0] === userId;
+
+      
       const otherUserName = isUser1 ? data.user2_name : data.user1_name;
       const otherUserAvatar = isUser1 ? data.user2_avatar : data.user1_avatar;
+      
+     
+      const otherUserId = isUser1 ? data.users?.[1] : data.users?.[0];
 
       return {
         id: doc.id,
@@ -79,6 +83,9 @@ export const subscribeToInbox = (userId: string, onUpdate: (chats: any[]) => voi
         avatar: otherUserAvatar || 'https://placehold.co/150',
         message: data.lastMessage || 'New Match!',
         timestamp: data.lastMessageTimestamp?.toDate ? data.lastMessageTimestamp.toDate() : new Date(),
+        
+      
+        otherUserId: otherUserId 
       };
     });
     onUpdate(chats);

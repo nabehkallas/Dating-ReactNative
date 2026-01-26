@@ -1,5 +1,5 @@
-// components/Matches/MatchCard.tsx
 import { PendingLike } from '@/services/MatchService';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -14,39 +14,55 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({ item, onResponse, isPlaceholder }: MatchCardProps) {
-  
+  const router = useRouter();
+
   if (isPlaceholder) {
     return <View style={[styles.card, { backgroundColor: 'transparent', elevation: 0, shadowOpacity: 0 }]} />;
   }
 
+
+  const openProfile = () => {
+    router.push({
+      pathname: '/public_profile',
+      params: { userId: item.id }
+    });
+  };
+
   return (
     <View style={styles.card}>
       
-      {/* 1. IMAGE */}
-      <Image 
-        source={{ uri: item.avatar }} 
-        style={[styles.image, item.isPrivate && styles.blurImage]} 
-        blurRadius={item.isPrivate ? 20 : 0}
-      />
-      
-      {/* 2. PRIVATE LOCK OVERLAY */}
-      {item.isPrivate && (
-        <View style={styles.privateOverlay}>
-          <Text style={{fontSize: 24}}>🔒</Text>
-        </View>
-      )}
 
-      {/* 3. TEXT INFO */}
-      <View style={styles.textOverlay}>
-        <Text style={styles.nameText}>
-          {item.name}, {item.age}
-        </Text>
-        {item.type === 'super' && (
-           <Text style={styles.superText}>★ Super Like</Text>
+      <TouchableOpacity 
+        style={styles.clickableArea} 
+        onPress={openProfile} 
+        activeOpacity={0.9}
+      >
+
+        <Image 
+          source={{ uri: item.avatar || 'https://placehold.co/200/png' }} 
+          style={[styles.image, item.isPrivate && styles.blurImage]} 
+          blurRadius={item.isPrivate ? 20 : 0}
+        />
+        
+        {/* PRIVATE LOCK OVERLAY */}
+        {item.isPrivate && (
+          <View style={styles.privateOverlay}>
+            <Text style={{fontSize: 24}}>🔒</Text>
+          </View>
         )}
-      </View>
 
-      {/* 4. ACTION BAR (Accept/Reject) */}
+        {/* TEXT INFO */}
+        <View style={styles.textOverlay}>
+          <Text style={styles.nameText}>
+            {item.name}, {item.age}
+          </Text>
+          {item.type === 'super' && (
+             <Text style={styles.superText}>★ Super Like</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+
+      {/* 5. ACTION BAR (Accept/Reject) - Separate from clickable area */}
       <View style={styles.actionBar}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => onResponse(item, 'reject')}>
           <Text style={[styles.actionIcon, { color: '#ff6b6b' }]}>✕</Text>
@@ -77,6 +93,12 @@ const styles = StyleSheet.create({
     elevation: 4,
     marginBottom: 5
   },
+  
+  clickableArea: {
+    flex: 1, 
+    marginBottom: 50,
+    position: 'relative'
+  },
   image: { 
     width: '100%', 
     height: '100%', 
@@ -89,7 +111,7 @@ const styles = StyleSheet.create({
   
   textOverlay: { 
     position: 'absolute', 
-    bottom: 60, // Sits above the action bar
+    bottom: 10, 
     left: 10, 
     right: 10, 
     zIndex: 2 
@@ -111,7 +133,7 @@ const styles = StyleSheet.create({
     height: 50,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Dark semi-transparent
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.1)'
   },

@@ -1,4 +1,4 @@
-import { User, mockUsers } from './Users';
+import { mockUsers } from './Users';
 
 export interface Message {
   senderId: string;
@@ -23,7 +23,7 @@ const createUserMap = (userIds: string[]) => {
   userIds.forEach(id => {
     const user = mockUsers.find(u => u.uid === id);
     if (user) {
-      map[id] = { avatar: user.profileImage, name: user.name }; 
+      map[id] = { avatar: user.avatar, name: user.name }; 
     }
   });
   return map;

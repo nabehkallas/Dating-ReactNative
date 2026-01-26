@@ -7,12 +7,12 @@ export interface Preferences {
 }
 
 export interface User {
-  id: string;
+  
   uid: string;
   name: string;
   age: number;
   bio: string;
-  profileImage: string;
+  avatar: string;
   gallery: string[];
   location: { latitude: number; longitude: number } | number[] | string;
   
@@ -20,7 +20,7 @@ export interface User {
   isVerified?: boolean;
   fcmTokens?: string[];
   BlockedUserIds?: string[];
-  preferences?: Preferences | (string | number)[]; // User's preferences for matching
+  preferences?: Preferences | (string | number)[]; 
 }
 export interface FeedUser extends User {
   distance_km?: number; 
@@ -28,12 +28,12 @@ export interface FeedUser extends User {
 
 export const mockUsers: User[] = [
   {
-    id: '1',
+    
     uid: 'uid1',
     name: 'Sarah',
     age: 24,
     bio: 'Hiker & Coffee lover',
-    profileImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80',
     gallery: ['https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=500&q=80'],
     location: { latitude: 40.7128, longitude: -74.0060 },
     gender: 'female',
@@ -47,12 +47,12 @@ export const mockUsers: User[] = [
     },
   },
   {
-    id: '2',
+    
     uid: 'uid2',
     name: 'John',
     age: 28,
     bio: 'Software Engineer & Gamer',
-    profileImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80',
     gallery: ['https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=80'],
     location: 'San Francisco',
     gender: 'male',
@@ -66,12 +66,12 @@ export const mockUsers: User[] = [
     },
   },
   {
-    id: '3',
+    
     uid: 'uid3',
     name: 'Emily',
     age: 22,
     bio: 'Artist & Cat enthusiast',
-    profileImage: 'https://via.placeholder.com/400/3357FF/FFFFFF?text=Emily',
+    avatar: 'https://via.placeholder.com/400/3357FF/FFFFFF?text=Emily',
     gallery: ['https://via.placeholder.com/400/3357FF/FFFFFF?text=Emily1', 'https://via.placeholder.com/400/3357FF/FFFFFF?text=Emily2'],
     location: { latitude: 34.0522, longitude: -118.2437 },
     gender: 'female',
@@ -85,12 +85,12 @@ export const mockUsers: User[] = [
     },
   },
   {
-    id: '4',
+    
     uid: 'uid4',
     name: 'Michael',
     age: 30,
     bio: 'Chef & Foodie',
-    profileImage: 'https://via.placeholder.com/400/FF33A1/FFFFFF?text=Michael',
+    avatar: 'https://via.placeholder.com/400/FF33A1/FFFFFF?text=Michael',
     gallery: ['https://via.placeholder.com/400/FF33A1/FFFFFF?text=Michael1', 'https://via.placeholder.com/400/FF33A1/FFFFFF?text=Michael2'],
     location: 'Chicago',
     gender: 'male',
@@ -104,12 +104,12 @@ export const mockUsers: User[] = [
     },
   },
   {
-    id: '5',
+    
     uid: 'uid5',
     name: 'Jessica',
     age: 26,
     bio: 'Traveler & Photographer',
-    profileImage: 'https://via.placeholder.com/400/A133FF/FFFFFF?text=Jessica',
+    avatar: 'https://via.placeholder.com/400/A133FF/FFFFFF?text=Jessica',
     gallery: ['https://via.placeholder.com/400/A133FF/FFFFFF?text=Jessica1', 'https://via.placeholder.com/400/A133FF/FFFFFF?text=Jessica2'],
     location: { latitude: 25.7617, longitude: -80.1918 },
     gender: 'female',

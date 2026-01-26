@@ -1,36 +1,38 @@
 import axios from 'axios';
+import { ip } from '../constants/constants';
 import { FeedUser } from '../constants/Users';
+import { auth } from '../firebaseConfig';
 
-const API_URL = 'http://172.20.10.3:8000/api';
 
-export const fetchFeed = async (currentUserId: string): Promise<FeedUser[]> => {
+const API_URL = ip; 
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+api.interceptors.request.use(async (config) => {
+  const user = auth.currentUser;
+  if (user) {
+    const token = await user.getIdToken();
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
+export const fetchFeed = async (userId: string): Promise<FeedUser[]> => {
   try {
-    const response = await axios.get<{ data: any[] }>(`${API_URL}/feed`, {
-      params: { user_id: currentUserId }
-    });
 
-    const cleanUsers: FeedUser[] = response.data.data.map((rawUser) => {
-      
-      let cleanLocation = rawUser.location;
-      if (Array.isArray(rawUser.location) && rawUser.location.length >= 2) {
-        cleanLocation = {
-          latitude: rawUser.location[0],
-          longitude: rawUser.location[1]
-        };
-      }
-
-      return {
-        ...rawUser,
-        location: cleanLocation,
-        isVerified: rawUser.isVerified || false, 
-        gallery: rawUser.gallery || [],
-      };
-    });
-
-    return cleanUsers;
-
+    const response = await api.get(`/feed?user_id=${userId}`);
+    
+    if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    
+    return [];
   } catch (error) {
-    console.error('Error fetching feed:', error);
+    console.error("Error fetching feed:", error);
     throw error;
   }
 };
